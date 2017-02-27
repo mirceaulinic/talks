@@ -1,0 +1,14 @@
+{%- set route_output = salt.route.show('0.0.0.0/0', 'static') -%}
+{%- set default_route = route_output['out'] -%}
+
+{%- if not default_route -%} {# if no default route found in the table #}
+  {%- if grains.vendor|lower == 'juniper' -%}
+routing-options {
+    static {
+        route 0.0.0.0/0 next-hop {{ pillar.default_route_nh }};
+    }
+}
+  {%- elif grains.os|lower == 'iosxr' -%}
+  router static address-family ipv4 unicast 0.0.0.0/0 {{ pillar.default_route_nh }}
+  {%- endif %}
+{%- endif -%}
