@@ -1,0 +1,10 @@
+{%- set router_vendor = grains.vendor -%}
+{%- set hostname = pillar.proxy.host -%}
+{%- if router_vendor|lower == 'juniper' %}
+system {
+    host-name {{hostname}}.lab;
+}
+{%- elif router_vendor|lower in ['cisco', 'arista'] %}
+{# both Cisco and Arista have the same syntax for hostname #}
+hostname {{hostname}}.lab
+{%- endif %}
