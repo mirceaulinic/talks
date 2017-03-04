@@ -1,0 +1,20 @@
+{%- set arp_output = salt.net.arp() -%}
+{%- set arp_table = arp_output['out'] -%}
+
+{%- if grains.os|lower == 'iosxr' %} {# if the device is a Cisco IOS-XR #}
+  {%- for arp_entry in arp_table %}
+arp {{ arp_entry['ip'] }} {{ arp_entry['mac'] }} arpa
+  {%- endfor -%}
+{%- elif grains.vendor|lower == 'juniper' %} {# or if the device is a Juniper #}
+interfaces {
+  {%- for arp_entry in arp_table %}
+  {{ arp_entry['interface'] }} {
+    family inet {
+      address {{ arp_entry['ip'] }} {
+       arp {{ arp_entry['ip'] }} mac {{ arp_entry['mac'] }};
+      }
+    }
+  }
+  {%- endfor %}
+}
+{%- endif %}
